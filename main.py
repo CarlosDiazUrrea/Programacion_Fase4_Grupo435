@@ -1,4 +1,4 @@
-   """Sistema de gestión de clientes, servicios y reservas - Software FJ.
+"""Sistema de gestión de clientes, servicios y reservas - Software FJ.
 
 Fase 4 - Programación UNAD. Demostración académica sin base de datos.
 Ejecutar: python main.py
