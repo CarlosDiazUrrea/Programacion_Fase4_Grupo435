@@ -322,6 +322,18 @@ class Gestor:
                 return reserva.describir()
         raise ElementoNoEncontrado(f"No se encontró la reserva {identificador}.")
 
+    # --- APORTE: CONSULTA Y REPORTE FINANCIERO EN MEMORIA ---
+    def generar_reporte_financiero(self):
+        """Calcula el recaudo total de reservas confirmadas y el conteo por estado."""
+        confirmadas = [r for r in self.reservas if r.estado == "CONFIRMADA"]
+        canceladas = [r for r in self.reservas if r.estado == "CANCELADA"]
+        recaudo_total = sum((r.total for r in confirmadas), Decimal("0.00"))
+        logging.info("Reporte financiero generado. Recaudo activo: $%s", recaudo_total)
+        return (
+            f"Confirmadas: {len(confirmadas)} | Canceladas: {len(canceladas)} | "
+            f"Recaudo neto activo: ${recaudo_total}"
+        )
+
 
 def ejecutar_prueba(numero, descripcion, funcion):
     """Try/except/else/finally: controla errores y continúa las pruebas."""
@@ -364,20 +376,25 @@ def demostracion():
         ("Cancelar reserva existente", lambda: gestor.cancelar_reserva("R01")),
         ("Rechazar segunda cancelación", lambda: gestor.cancelar_reserva("R01")),
         ("Rechazar cliente inexistente", lambda: gestor.crear_reserva("R06", "C99", "S01", 1)),
+        # --- PRUEBAS ADICIONALES DE VALIDACIÓN Y REPORTE ---
+        ("Confirmar reserva de asesoría con descuento", lambda: gestor.crear_reserva("R07", "C01", "A01", 2, 15, 0)),
+        ("Rechazar reserva con identificador duplicado", lambda: gestor.crear_reserva("R07", "C03", "S01", 1)),
+        ("Rechazar cancelación de reserva inexistente", lambda: gestor.cancelar_reserva("R99")),
+        ("Consultar reporte financiero consolidado", lambda: gestor.generar_reporte_financiero()),
     ]
     logging.info("Inicio de la simulación académica")
     print("SOFTWARE FJ - GESTIÓN DE CLIENTES, SERVICIOS Y RESERVAS")
-    print("Ejecutando 18 pruebas; las fallas intencionales deben ser controladas.")
+    print("Ejecutando 22 pruebas; las fallas intencionales deben ser controladas.")
     for numero, (descripcion, funcion) in enumerate(casos, start=1):
         ejecutar_prueba(numero, descripcion, funcion)
     print("\nRESUMEN FINAL")
     print(f"Clientes registrados: {len(gestor.clientes)}")
     print(f"Servicios registrados: {len(gestor.servicios)}")
     print(f"Reservas confirmadas o canceladas: {len(gestor.reservas)}")
+    print(f"Estado financiero: {gestor.generar_reporte_financiero()}")
     print("Consulta eventos.log para revisar eventos y errores.")
     logging.info("Fin de la simulación")
 
 
 if __name__ == "__main__":
     demostracion()
-
